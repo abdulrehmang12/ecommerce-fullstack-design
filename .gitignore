@@ -1,0 +1,30 @@
+# Create .gitignore in root folder
+New-Item -Path "D:\mern\ecommerce-fullstack-design\.gitignore" -ItemType File -Value @"
+# Dependencies
+frontend/node_modules/
+backend/node_modules/
+npm-debug.log
+yarn-error.log
+
+# Production
+/build
+/dist
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+"@
