@@ -1,4 +1,4 @@
-# ecommerce-fullstack-design
+# Ecommerce Fullstack Design
 
 A full-stack eCommerce web app with responsive React frontend and Express backend.
 
