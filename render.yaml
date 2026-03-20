@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ecommerce-api
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+
+  - type: static
+    name: ecommerce-frontend
+    rootDir: frontend
+    buildCommand: npm install ; npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://ecommerce-api.onrender.com/api

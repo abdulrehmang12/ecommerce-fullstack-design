@@ -1,102 +1,129 @@
-New-Item -Path "D:\mern\ecommerce-fullstack-design\README.md" -ItemType File -Value @"
-# EStore - Full-Stack eCommerce Application
+# ecommerce-fullstack-design
 
-A modern, fully responsive eCommerce web application built with React and Node.js.
+A full-stack eCommerce web app with responsive React frontend and Express backend.
 
-## Project Structure
+## Week 1-3 Status
 
-\`\`\`
-ecommerce-fullstack-design/
-├── frontend/                 # React frontend
-│   ├── src/
-│   │   ├── components/      # Reusable components
-│   │   ├── pages/           # Page components
-│   │   ├── App.jsx
-│   │   └── index.js
-│   ├── public/
-│   └── package.json
-├── backend/                  # Express.js backend (Week 2)
-└── README.md
-\`\`\`
+- Week 1: Responsive desktop/mobile pages completed.
+- Week 2: Dynamic backend API integration completed.
+- Week 3: JWT auth, protected admin CRUD, cart persistence, and deployment templates completed.
 
 ## Features
 
-- ✅ Responsive design (desktop & mobile)
-- ✅ Product listing with search & filters
-- ✅ Product details page
-- ✅ Shopping cart with localStorage
-- ✅ Professional UI with Tailwind CSS
+- Responsive home, listing, details, and cart pages.
+- Dynamic products from backend API.
+- Search and category filtering.
+- Cart add/remove/update persisted in localStorage.
+- JWT login/signup flow.
+- Protected admin panel for product create/edit/delete.
+- Admin-only backend protection for product/user mutations.
+- Password reset flow with reset token request and reset endpoint.
+- MongoDB persistence with Mongoose models.
 
-## Week 1: Frontend Development ✅
+## Tech Stack
 
-**Completed:**
-- Home page with hero section
-- Product listing page with filters
-- Product details page
-- Shopping cart page
-- Responsive navbar and footer
-- Mobile-friendly design
+- Frontend: React, React Router, Tailwind CSS
+- Backend: Node.js, Express
+- Auth: JWT + bcryptjs
+- Data: MongoDB + Mongoose
 
-## Week 2: Backend Integration (In Progress)
+## Project Structure
 
-- MongoDB setup
-- Express.js API
-- Dynamic product fetching
-- Authentication
+```text
+backend/
+  config/db.js
+  data/products.js
+  models/
+  server.js
+frontend/
+  src/
+    api/
+    components/
+    pages/
+    utils/
+server.js
+render.yaml
+```
 
-## Week 3: Deployment & Admin Panel (Upcoming)
+## Local Setup
 
-- User authentication (JWT)
-- Admin panel
-- Deployment to production
+### 1) Backend
 
-## Technologies Used
-
-### Frontend
-- React.js
-- React Router
-- Tailwind CSS
-- localStorage
-
-### Backend (Week 2)
-- Node.js
-- Express.js
-- MongoDB
-- JWT
-
-## Getting Started
-
-### Frontend Setup
-
-\`\`\`bash
-cd frontend
-npm install
-npm start
-\`\`\`
-
-App will run at \`http://localhost:3000\`
-
-### Backend Setup (Week 2)
-
-\`\`\`bash
+```bash
 cd backend
 npm install
+npm run dev
+```
+
+Backend runs at `http://localhost:5000`.
+
+Create `backend/.env` with:
+
+```env
+PORT=5000
+JWT_SECRET=replace-with-a-strong-random-secret
+MONGODB_URI=mongodb://127.0.0.1:27017/ecommerce_fullstack_design
+```
+
+### 2) Frontend
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
 npm start
-\`\`\`
+```
 
-Server will run at \`http://localhost:5000\`
+Frontend runs at `http://localhost:3000`.
 
-## Project Timeline
+## Demo Admin Credentials
 
-- **Week 1**: Static frontend ✅
-- **Week 2**: Backend & database integration
-- **Week 3**: Authentication, admin panel, deployment
+- Email: `admin@estore.com`
+- Password: `admin123`
 
-## Author
+## API Endpoints
 
-Abdul Rehman
+### Auth
 
-## Deadline
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/request-password-reset`
+- `POST /api/auth/reset-password`
 
-3rd April, 2026
-"@
+### Admin Users (admin)
+
+- `POST /api/admin/users`
+- `GET /api/admin/users`
+
+### Products
+
+- `GET /api/products`
+- `GET /api/products/categories`
+- `GET /api/products/:id`
+- `POST /api/products` (admin)
+- `PUT /api/products/:id` (admin)
+- `DELETE /api/products/:id` (admin)
+
+## Deployment (Render)
+
+A deployment template is included in `render.yaml`:
+
+- `ecommerce-api` web service (backend)
+- `ecommerce-frontend` static site (frontend)
+
+After creating services on Render, set the static site env var:
+
+- `REACT_APP_API_URL=https://<your-api-service>.onrender.com/api`
+
+Set backend env vars on Render:
+
+- `JWT_SECRET`
+- `MONGODB_URI`
+
+## Notes
+
+- Admin bootstrap user is seeded if no users exist:
+  - Email: `admin@estore.com`
+  - Password: `admin123`
+- Demo walkthrough script is available in `DEMO_SCRIPT.md`.

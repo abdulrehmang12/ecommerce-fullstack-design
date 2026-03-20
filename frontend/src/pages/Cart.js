@@ -1,182 +1,133 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getCart, removeFromCart, updateCartQuantity } from '../utils/cart';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load cart from localStorage
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-    setLoading(false);
+    setCartItems(getCart());
   }, []);
 
-  const removeFromCart = (productId) => {
-    const updatedCart = cartItems.filter(item => item.id !== productId);
-    setCartItems(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  const handleRemove = (id) => {
+    const next = removeFromCart(id);
+    setCartItems(next);
   };
 
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-
-    const updatedCart = cartItems.map(item =>
-      item.id === productId ? { ...item, quantity } : item
-    );
-    setCartItems(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  const handleQuantity = (id, quantity) => {
+    const next = updateCartQuantity(id, quantity);
+    setCartItems(next);
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const tax = subtotal * 0.1; // 10% tax
-  const shipping = cartItems.length > 0 ? 10 : 0;
-  const total = subtotal + tax + shipping;
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const { subtotal, tax, shipping, total } = useMemo(() => {
+    const subtotalValue = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const taxValue = subtotalValue * 0.1;
+    const shippingValue = cartItems.length > 0 ? 10 : 0;
+    return {
+      subtotal: subtotalValue,
+      tax: taxValue,
+      shipping: shippingValue,
+      total: subtotalValue + taxValue + shippingValue
+    };
+  }, [cartItems]);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold mb-8">Shopping Cart</h1>
+    <section className="px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <h1 className="mb-6 text-3xl font-extrabold text-slate-900">My cart ({cartItems.length})</h1>
 
         {cartItems.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🛒</div>
-            <p className="text-2xl font-semibold text-gray-800 mb-4">Your cart is empty</p>
-            <p className="text-gray-600 mb-8">Add some items to get started!</p>
-            <Link
-              to="/products"
-              className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Continue Shopping
+          <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center">
+            <p className="text-xl font-bold text-slate-800">Your cart is empty</p>
+            <p className="mt-2 text-sm text-slate-500">Add some products to continue</p>
+            <Link to="/products" className="mt-5 inline-block rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-bold text-white">
+              Browse products
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2">
-              <div className="bg-gray-50 rounded-lg overflow-hidden">
-                {cartItems.map(item => (
-                  <div key={item.id} className="border-b p-4 flex gap-4 hover:bg-gray-100 transition">
-                    {/* Product Image */}
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-24 h-24 object-cover rounded"
-                    />
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-4 lg:col-span-2">
+              {cartItems.map((item) => (
+                <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row">
+                    <img src={item.image} alt={item.name} className="h-24 w-24 rounded-xl object-cover" />
 
-                    {/* Product Details */}
-                    <div className="flex-grow">
-                      <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
-                      <p className="text-gray-600">${item.price.toFixed(2)}</p>
-                      <p className="text-sm text-gray-500">{item.category}</p>
+                    <div className="flex-1">
+                      <h2 className="text-lg font-bold text-slate-900">{item.name}</h2>
+                      <p className="text-sm text-slate-500">{item.category}</p>
+                      <p className="mt-2 text-lg font-extrabold text-slate-900">${item.price.toFixed(2)}</p>
                     </div>
 
-                    {/* Quantity */}
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 rounded border border-gray-300 hover:bg-gray-300 transition"
+                        onClick={() => handleQuantity(item.id, item.quantity - 1)}
+                        className="h-8 w-8 rounded border border-slate-300 font-bold"
                       >
-                        −
+                        -
                       </button>
                       <input
                         type="number"
                         value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                        className="w-12 text-center border rounded"
+                        min="1"
+                        onChange={(event) => handleQuantity(item.id, Number(event.target.value) || 1)}
+                        className="w-14 rounded border border-slate-300 px-2 py-1 text-center"
                       />
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 rounded border border-gray-300 hover:bg-gray-300 transition"
+                        onClick={() => handleQuantity(item.id, item.quantity + 1)}
+                        className="h-8 w-8 rounded border border-slate-300 font-bold"
                       >
                         +
                       </button>
                     </div>
 
-                    {/* Subtotal */}
-                    <div className="text-right min-w-[100px]">
-                      <p className="text-lg font-semibold text-blue-600">
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </p>
+                    <div className="text-right">
+                      <p className="font-bold text-blue-700">${(item.price * item.quantity).toFixed(2)}</p>
+                      <button onClick={() => handleRemove(item.id)} className="mt-2 text-xs font-bold text-rose-700">
+                        Remove
+                      </button>
                     </div>
-
-                    {/* Remove Button */}
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-red-600 hover:text-red-800 font-semibold transition"
-                    >
-                      ✕
-                    </button>
                   </div>
-                ))}
-              </div>
+                </article>
+              ))}
             </div>
 
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-blue-50 rounded-lg p-6 sticky top-20">
-                <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+            <aside className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h2 className="text-xl font-extrabold text-slate-900">Order summary</h2>
 
-                <div className="space-y-4 mb-6 border-b pb-6">
-                  <div className="flex justify-between text-gray-700">
-                    <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-700">
-                    <span>Tax (10%)</span>
-                    <span>${tax.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-700">
-                    <span>Shipping</span>
-                    <span>${shipping.toFixed(2)}</span>
-                  </div>
+              <div className="mt-5 space-y-3 border-b border-slate-200 pb-5 text-sm">
+                <div className="flex justify-between text-slate-600">
+                  <span>Subtotal</span>
+                  <span>${subtotal.toFixed(2)}</span>
                 </div>
-
-                <div className="flex justify-between text-xl font-bold mb-6">
-                  <span>Total</span>
-                  <span className="text-blue-600">${total.toFixed(2)}</span>
+                <div className="flex justify-between text-slate-600">
+                  <span>Tax (10%)</span>
+                  <span>${tax.toFixed(2)}</span>
                 </div>
-
-                <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mb-4">
-                  Proceed to Checkout
-                </button>
-
-                <Link
-                  to="/products"
-                  className="block w-full text-center border-2 border-blue-600 text-blue-600 py-3 rounded-lg font-semibold hover:bg-blue-50 transition"
-                >
-                  Continue Shopping
-                </Link>
-
-                {/* Promo Code */}
-                <div className="mt-6">
-                  <input
-                    type="text"
-                    placeholder="Promo Code"
-                    className="w-full border rounded px-3 py-2 mb-2"
-                  />
-                  <button className="w-full bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition">
-                    Apply
-                  </button>
+                <div className="flex justify-between text-slate-600">
+                  <span>Shipping</span>
+                  <span>${shipping.toFixed(2)}</span>
                 </div>
               </div>
-            </div>
+
+              <div className="mt-4 flex justify-between text-lg font-extrabold text-slate-900">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+
+              <button className="mt-5 w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-700">
+                Proceed to checkout
+              </button>
+
+              <Link
+                to="/products"
+                className="mt-3 block w-full rounded-lg border border-blue-600 px-4 py-3 text-center text-sm font-bold text-blue-700"
+              >
+                Continue shopping
+              </Link>
+            </aside>
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,145 +1,146 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import HeroSection from '../components/HeroSection';
+import { productsApi } from '../api/productsApi';
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Sample featured products
-    setFeaturedProducts([
-      {
-        id: '1',
-        name: 'Wireless Headphones',
-        price: 79.99,
-        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
-        description: 'Premium wireless headphones with noise cancellation',
-        category: 'Electronics',
-        stock: 50
-      },
-      {
-        id: '2',
-        name: 'USB-C Cable',
-        price: 12.99,
-        image: 'https://images.unsplash.com/photo-1625948515291-69613efd103f?w=500',
-        description: 'Durable USB-C charging cable',
-        category: 'Accessories',
-        stock: 100
-      },
-      {
-        id: '3',
-        name: 'Phone Case',
-        price: 24.99,
-        image: 'https://images.unsplash.com/photo-1606933248051-5ce27db6ceaa?w=500',
-        description: 'Protective phone case for all models',
-        category: 'Accessories',
-        stock: 75
-      },
-      {
-        id: '4',
-        name: 'Wireless Mouse',
-        price: 34.99,
-        image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=500',
-        description: 'Ergonomic wireless mouse',
-        category: 'Electronics',
-        stock: 60
+    const loadHomeData = async () => {
+      try {
+        const [featured, allCategories] = await Promise.all([
+          productsApi.getFeaturedProducts(),
+          productsApi.getCategories()
+        ]);
+        setFeaturedProducts(featured);
+        setCategories(allCategories);
+      } catch (_error) {
+        setFeaturedProducts([]);
+      } finally {
+        setLoading(false);
       }
-    ]);
-    setLoading(false);
+    };
+
+    loadHomeData();
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Welcome to EStore
-          </h1>
-          <p className="text-lg md:text-xl mb-8 text-blue-100">
-            Discover amazing products at unbeatable prices
-          </p>
-          <Link
-            to="/products"
-            className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
-          >
-            Shop Now
-          </Link>
-        </div>
-      </section>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <HeroSection />
 
-      {/* Features Section */}
-      <section className="bg-gray-50 py-12 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="text-4xl mb-4">🚚</div>
-            <h3 className="text-xl font-semibold mb-2">Free Shipping</h3>
-            <p className="text-gray-600">On orders over $50</p>
+      {/* Best Deals Section */}
+      <section className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-blue-700">Limited Time Offers</p>
+            <h2 className="mt-2 text-3xl font-extrabold text-slate-900">Best Deals on Latest Phones</h2>
           </div>
-          <div className="text-center">
-            <div className="text-4xl mb-4">💳</div>
-            <h3 className="text-xl font-semibold mb-2">Secure Payment</h3>
-            <p className="text-gray-600">100% safe transactions</p>
-          </div>
-          <div className="text-center">
-            <div className="text-4xl mb-4">↩️</div>
-            <h3 className="text-xl font-semibold mb-2">Easy Returns</h3>
-            <p className="text-gray-600">30-day money back</p>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { brand: 'iPhone 15 Pro', discount: '-12%' },
+              { brand: 'Samsung S24', discount: '-15%' },
+              { brand: 'Xiaomi 14 Ultra', discount: '-18%' },
+              { brand: 'OnePlus 12', discount: '-20%' }
+            ].map((item) => (
+              <div key={item.brand} className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-lg hover:-translate-y-1">
+                <div className="relative h-40 bg-gradient-to-br from-blue-50 to-slate-100 rounded-xl overflow-hidden mb-4 flex items-center justify-center">
+                  <p className="text-slate-400 font-semibold">{item.brand}</p>
+                  <span className="absolute top-3 right-3 rounded-full bg-rose-600 text-white px-3 py-1 text-xs font-bold">{item.discount}</span>
+                </div>
+                <p className="text-sm font-bold text-slate-900">{item.brand}</p>
+                <Link to="/products" className="mt-3 w-full block rounded-lg bg-blue-600 py-2 text-center text-sm font-bold text-white transition hover:bg-blue-700">
+                  View Deal
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
-            Featured Products
-          </h2>
-          <p className="text-gray-600 text-center mb-12">
-            Check out our best-selling items
-          </p>
+      {/* Featured Products */}
+      <section className="px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-blue-700">Premium Selection</p>
+              <h2 className="mt-2 text-3xl font-extrabold text-slate-900">Featured Smartphones</h2>
+            </div>
+            <LinkToProducts />
+          </div>
 
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex h-56 items-center justify-center">
+              <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {featuredProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} viewMode="grid" />
               ))}
             </div>
           )}
+        </div>
+      </section>
 
-          <div className="text-center mt-12">
-            <Link
-              to="/products"
-              className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              View All Products
-            </Link>
+      {/* Brand Showcase */}
+      <section className="px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-8 text-center">Shop by Brand</h2>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {[
+              { label: 'Apple iPhone', brand: 'Apple' },
+              { label: 'Samsung Galaxy', brand: 'Samsung' },
+              { label: 'Google Pixel', brand: 'Google' },
+              { label: 'Xiaomi', brand: 'Xiaomi' },
+              { label: 'OnePlus', brand: 'OnePlus' },
+              { label: 'All Phones', brand: '' },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                to={item.brand ? `/products?brand=${item.brand}` : '/products'}
+                className="group rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm transition hover:shadow-lg hover:border-blue-400"
+              >
+                <div className="h-20 bg-gradient-to-br from-blue-100 to-slate-100 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-slate-400 font-semibold text-sm">{item.label}</span>
+                </div>
+                <p className="font-bold text-slate-900 group-hover:text-blue-700 transition">{item.label}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="bg-blue-600 text-white py-12 px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Subscribe to Our Newsletter</h2>
-          <p className="mb-6">Get the latest updates on new products and special offers</p>
-          <div className="flex gap-2">
+      {/* Newsletter */}
+      <section className="px-4 pb-10 pt-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl rounded-2xl bg-gradient-to-r from-blue-700 to-blue-600 p-8 text-center">
+          <h2 className="text-3xl font-extrabold text-white">Get Latest Phone Deals</h2>
+          <p className="mt-2 text-blue-100">Subscribe to get exclusive offers and new phone launches first</p>
+          <form className="mx-auto mt-6 flex max-w-xl flex-col gap-3 sm:flex-row" onSubmit={(e) => e.preventDefault()}>
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded text-gray-800"
+              className="flex-1 rounded-lg px-4 py-3 text-sm text-slate-800 outline-none"
+              required
             />
-            <button className="bg-blue-800 px-6 py-3 rounded font-semibold hover:bg-blue-900 transition">
+            <button className="rounded-lg bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-800">
               Subscribe
             </button>
-          </div>
+          </form>
         </div>
       </section>
     </div>
+  );
+}
+
+function LinkToProducts() {
+  return (
+    <Link to="/products" className="text-sm font-bold text-blue-700">
+      View all products
+    </Link>
   );
 }
